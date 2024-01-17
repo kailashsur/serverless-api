@@ -1,16 +1,18 @@
 
-const express = require("express");
-const app = express();
-const User = require("./Schema/User");
-const cors = require("cors")
-const mongoose = require("mongoose")
-require('dotenv').config();
 
+import express from 'express'
+import cors from "cors"
+import mongoose from 'mongoose';
+import 'dotenv/config'
+
+import User from './Schema/User.js'
+
+const app = express();
 
 
 let emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/; // regex for email
 let passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/; // regex for password
-// const dbURI = "mongodb+srv://kailashsur:OER7Y9PfiTrI5EDI@blogdb.jbop2lf.mongodb.net/lambda?retryWrites=true&w=majority"
+
 
 app.use(express.json())
 app.use(cors())
@@ -73,5 +75,6 @@ app.use((req, res, next) => {
 });
 
 
-module.exports = app;
+// module.exports = app;
 // export default app;
+export default app;

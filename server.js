@@ -1,6 +1,6 @@
-'use strict';
 
-const app = require('./app');
+import app from "./app.js";
+
 let port = 3000;
 
 app.listen(3000, () => {

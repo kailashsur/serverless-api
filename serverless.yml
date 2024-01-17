@@ -6,11 +6,10 @@ plugins:
   - serverless-dotenv-plugin
 provider:
   name: aws
-  runtime: nodejs18.x
+  runtime: nodejs20.x
   region: ap-south-1
   memorySize: 128
   environment:
-
 functions:
   api:
     handler: index.handler
