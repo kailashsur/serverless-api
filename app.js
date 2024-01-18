@@ -10,8 +10,8 @@ import 'dotenv/config';
 import admin from 'firebase-admin'
 import serviceAccountKey from './medium-clone-82f8c-firebase-adminsdk-5ihb8-8d03a2c2e1.json' assert { type: "json" }       // This things is very important to do, otherwise it will throw error
 import { getAuth } from "firebase-admin/auth"
-import aws from "aws-sdk"
-import appwriteServices from './appwrite.js'
+// import aws from "aws-sdk"
+// import appwriteServices from './appwrite.js'
 import multer from 'multer';
 
 import User from './Schema/User.js'

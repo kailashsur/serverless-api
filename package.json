@@ -5,7 +5,7 @@
   "type": "module",
   "dependencies": {
     "appwrite": "^13.0.1",
-    "aws-sdk": "^2.1537.0",
+    "aws-sdk": "^2.1538.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
