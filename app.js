@@ -147,7 +147,7 @@ app.post("/image-list", verifyJWT, async (req, res)=>{
         let filesArray = [];
         files.map( (img)=>{
             // console.log(img.$id);
-            console.log(img.name);
+            // console.log(img.name);
             let { href} = appwriteServices.getFilePreview(img.$id)
             filesArray.push({id : img.$id ,name : img.name, url : href})
         })
