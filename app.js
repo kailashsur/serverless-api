@@ -11,7 +11,7 @@ import admin from 'firebase-admin'
 import serviceAccountKey from './medium-clone-82f8c-firebase-adminsdk-5ihb8-8d03a2c2e1.json' assert { type: "json" }       // This things is very important to do, otherwise it will throw error
 import { getAuth } from "firebase-admin/auth"
 // import aws from "aws-sdk"
-// import appwriteServices from './appwrite.js'
+import appwriteServices from './appwrite.js'
 import multer from 'multer';
 
 import User from './Schema/User.js'
@@ -104,10 +104,10 @@ const verifyJWT = (req, res, next) => {
 }
 
 const formateDatatoSend = (user) => {
-
     const access_token = jwt.sign({ id: user._id }, process.env.SECRET_ACCESS_KEY);
 
     return {
+        admin : user.admin,
         access_token,
         profile_img: user.personal_info.profile_img,
         username: user.personal_info.username,
@@ -123,14 +123,6 @@ const generateUsername = async (email) => {
     isUsernameNotUnique ? username += nanoid().substring(0, 5) : "";
     return username
 }
-
-// Set up Multer to handle file uploads
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
-
-// app.post('/img-url', async (req, res) => {
-//     let { img } = req.body;
-// });
 
 
 // Upload image url route
@@ -148,8 +140,26 @@ app.get('/get-upload-url', async (req, res) => {
 
 //TODO: -------------------Authentication Route-----------------------------------
 
+app.post("/image-list", verifyJWT, async (req, res)=>{
+    await appwriteServices.imageList()
+    .then(({total, files}) =>{
 
+        let filesArray = [];
+        files.map( (img)=>{
+            // console.log(img.$id);
+            console.log(img.name);
+            let { href} = appwriteServices.getFilePreview(img.$id)
+            filesArray.push({id : img.$id ,name : img.name, url : href})
+        })
 
+        return res.status(200).json({total : total, files : filesArray})
+    })
+    .catch(err=>{
+        return res.status(500).json({error : err.message});
+    })
+})
+
+//-------------------------------------------------------------------------------
 app.post("/signup", (req, res) => {
     let { fullname, email, password } = req.body;
 
@@ -889,7 +899,24 @@ app.post("/change-password", verifyJWT, (req, res) => {
 
 //TODO: -------------------Server Start and Listening-----------------------------------
 
+app.get("/new-notification", verifyJWT, (req, res)=>{
 
+    let user_id = req.user;
+
+    Notification.exists({ notification_for : user_id, seen : false, user:{ $ne: user_id } })
+    .then(result =>{
+        if(result){
+            return res.status(200).json({new_notification_available : true})
+        }
+        else{
+            return res.status(200).json({new_notification_available : false})
+        }
+    })
+    .catch(err=>{
+        console.log(err);
+        return res.status(500).json({error : err.message})
+    })
+})
 
 app.use((req, res, next) => {
     return res.status(404).json({

@@ -7,6 +7,10 @@ let profile_imgs_collections_list = ["notionists-neutral", "adventurer-neutral",
 
 const userSchema = mongoose.Schema({
 
+    admin: {
+        type: Boolean,
+        default: false
+    },
     personal_info: {
         fullname: {
             type: String,
