@@ -292,24 +292,24 @@ app.post("/google-auth", async (req, res) => {
 
 //TODO: -------------------Blog Route-----------------------------------
 
-app.post("/latest-blogs", (req, res) => {
+// app.post("/latest-blogs", (req, res) => {
 
-    let { page } = req.body;
-    let max_limit = 5;
+//     let { page } = req.body;
+//     let max_limit = 5;
 
-    Blog.find({ draft: false })
-        .populate("author", " personal_info.profile_img personal_info.username personal_info.fullname -_id ")
-        .sort({ publishedAt: -1 })
-        .select("blog_id title description banner activity tags publishedAt -_id")
-        .skip((page - 1) * max_limit)
-        .limit(max_limit)
-        .then(blogs => {
-            return res.status(200).json({ blogs })
-        })
-        .catch(err => {
-            return res.status(500).json({ error: err.message })
-        })
-})
+//     Blog.find({ draft: false })
+//         .populate("author", " personal_info.profile_img personal_info.username personal_info.fullname -_id ")
+//         .sort({ publishedAt: -1 })
+//         .select("blog_id title description banner activity tags publishedAt -_id")
+//         .skip((page - 1) * max_limit)
+//         .limit(max_limit)
+//         .then(blogs => {
+//             return res.status(200).json({ blogs })
+//         })
+//         .catch(err => {
+//             return res.status(500).json({ error: err.message })
+//         })
+// })
 
 
 app.post("/all-latest-blogs-count", (req, res) => {

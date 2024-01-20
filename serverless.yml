@@ -9,7 +9,7 @@ provider:
   name: aws
   runtime: nodejs20.x
   region: ap-south-1
-  memorySize: 128
+  memorySize: 512
   environment:
 
 functions:
@@ -17,3 +17,16 @@ functions:
     handler: index.handler
     events:
       - httpApi: '*'
+
+  Medias:
+    handler: index.MediaHandler
+    events:
+      - httpApi:
+          path: /new-feature
+          method: GET
+  Blogs:
+    handler: index.latestBlog
+    events:
+      - httpApi:
+          path: /latest-blogs
+          method: POST
