@@ -12,7 +12,6 @@ import serviceAccountKey from './medium-clone-82f8c-firebase-adminsdk-5ihb8-8d03
 import { getAuth } from "firebase-admin/auth"
 // import aws from "aws-sdk"
 import appwriteServices from './appwrite.js'
-import multer from 'multer';
 
 import User from './Schema/User.js'
 import Blog from './Schema/Blog.js';
@@ -107,7 +106,7 @@ const formateDatatoSend = (user) => {
     const access_token = jwt.sign({ id: user._id }, process.env.SECRET_ACCESS_KEY);
 
     return {
-        admin : user.admin,
+        admin: user.admin,
         access_token,
         profile_img: user.personal_info.profile_img,
         username: user.personal_info.username,
@@ -140,23 +139,23 @@ app.get('/get-upload-url', async (req, res) => {
 
 //TODO: -------------------Authentication Route-----------------------------------
 
-app.post("/image-list", verifyJWT, async (req, res)=>{
+app.post("/image-list", verifyJWT, async (req, res) => {
     await appwriteServices.imageList()
-    .then(({total, files}) =>{
+        .then(({ total, files }) => {
 
-        let filesArray = [];
-        files.map( (img)=>{
-            // console.log(img.$id);
-            // console.log(img.name);
-            let { href} = appwriteServices.getFilePreview(img.$id)
-            filesArray.push({id : img.$id ,name : img.name, url : href})
+            let filesArray = [];
+            files.map((img) => {
+                // console.log(img.$id);
+                // console.log(img.name);
+                let { href } = appwriteServices.getFilePreview(img.$id)
+                filesArray.push({ id: img.$id, name: img.name, url: href })
+            })
+
+            return res.status(200).json({ total: total, files: filesArray })
         })
-
-        return res.status(200).json({total : total, files : filesArray})
-    })
-    .catch(err=>{
-        return res.status(500).json({error : err.message});
-    })
+        .catch(err => {
+            return res.status(500).json({ error: err.message });
+        })
 })
 
 //-------------------------------------------------------------------------------
@@ -899,29 +898,83 @@ app.post("/change-password", verifyJWT, (req, res) => {
 
 //TODO: -------------------Server Start and Listening-----------------------------------
 
-app.get("/new-notification", verifyJWT, (req, res)=>{
+app.get("/new-notification", verifyJWT, (req, res) => {
 
     let user_id = req.user;
 
-    Notification.exists({ notification_for : user_id, seen : false, user:{ $ne: user_id } })
-    .then(result =>{
-        if(result){
-            return res.status(200).json({new_notification_available : true})
-        }
-        else{
-            return res.status(200).json({new_notification_available : false})
-        }
-    })
-    .catch(err=>{
-        console.log(err);
-        return res.status(500).json({error : err.message})
-    })
+    Notification.exists({ notification_for: user_id, seen: false, user: { $ne: user_id } })
+        .then(result => {
+            if (result) {
+                return res.status(200).json({ new_notification_available: true })
+            }
+            else {
+                return res.status(200).json({ new_notification_available: false })
+            }
+        })
+        .catch(err => {
+            console.log(err);
+            return res.status(500).json({ error: err.message })
+        })
 })
 
-app.use((req, res, next) => {
-    return res.status(404).json({
-        error: "Not Found",
-    });
+// app.use((req, res, next) => {
+//     return res.status(404).json({
+//         error: "Not Found",
+//     });
+// });
+
+
+//------------------------------------------
+app.post("/user-written-blogs", verifyJWT, (req, res) => {
+    let user_id = req.user;
+
+    let { page, draft, query, deletedDocCount } = req.body;
+
+    let maxLimit = 5;
+    let skipDocs = (page - 1) + maxLimit;
+
+    if (deletedDocCount) {
+        skipDocs -= deletedDocCount;
+    }
+
+    Blog.find({ author: user_id, draft, title: new RegExp(query, 'i') })
+        .skip(skipDocs)
+        .limit(maxLimit)
+        .sort({ publishedAt: -1 })
+        .select(" title banner publishedAt blog_id activity description draft -_id")
+        .then(blogs => {
+            return res.status(200).json({ blogs })
+        })
+        .catch(err => {
+            return res.status(500).json({ error: err.message })
+        })
+})
+
+app.post("/user-posts", verifyJWT, (req, res) => {
+    let user_id = req.user;
+    let { draft } = req.body;
+
+    let query = {};
+    if (draft !== undefined) {
+        query = { author: user_id, draft: draft };
+    } else {
+        query = { author: user_id };
+    }
+    
+
+    Blog.find(query)
+        .populate("author", " personal_info.profile_img personal_info.username personal_info.fullname -_id ")
+        .sort({ "activity.total_read": -1, "activity.total_likes": -1, " publishedAt": -1 })
+        .select("blog_id title banner activity publishedAt -_id")
+        .limit(5)
+        .then(blogs => {
+            return res.status(200).json({ blogs })
+        })
+        .catch(err => {
+            return res.status(500).json({ error: err.message })
+        })
 });
+
+
 
 export default app;
