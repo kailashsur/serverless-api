@@ -976,5 +976,20 @@ app.post("/user-posts", verifyJWT, (req, res) => {
 });
 
 
+app.post("/delete-user-post", verifyJWT, (req, res) => {
+    let user_id = req.user;
+    let { blog_id } = req.body;
+
+    Blog.findOneAndDelete({ author : user_id ,blog_id : blog_id})
+    .then(()=>{
+        return res.status(200).json({status : "Post deleted successfully"});
+    })
+    .catch(err =>{
+        return res.status(500).json({ error: err.message });
+    })
+
+});
+
+
 
 export default app;
