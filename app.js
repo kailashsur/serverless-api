@@ -954,15 +954,10 @@ app.post("/user-posts", verifyJWT, (req, res) => {
     let user_id = req.user;
     let { draft } = req.body;
 
-    let query = {};
-    if (draft !== undefined) {
-        query = { author: user_id, draft: draft };
-    } else {
-        query = { author: user_id };
-    }
+    
     
 
-    Blog.find(query)
+    Blog.find({author : user_id, draft})
         .populate("author", " personal_info.profile_img personal_info.username personal_info.fullname -_id ")
         .sort({ "activity.total_read": -1, "activity.total_likes": -1, " publishedAt": -1 })
         .select("blog_id title banner activity publishedAt -_id")
