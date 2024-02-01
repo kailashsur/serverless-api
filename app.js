@@ -291,24 +291,24 @@ app.post("/google-auth", async (req, res) => {
 
 //TODO: -------------------Blog Route-----------------------------------
 
-// app.post("/latest-blogs", (req, res) => {
+app.post("/latest-blogs", (req, res) => {
 
-//     let { page } = req.body;
-//     let max_limit = 5;
+    let { page } = req.body;
+    let max_limit = 5;
 
-//     Blog.find({ draft: false })
-//         .populate("author", " personal_info.profile_img personal_info.username personal_info.fullname -_id ")
-//         .sort({ publishedAt: -1 })
-//         .select("blog_id title description banner activity tags publishedAt -_id")
-//         .skip((page - 1) * max_limit)
-//         .limit(max_limit)
-//         .then(blogs => {
-//             return res.status(200).json({ blogs })
-//         })
-//         .catch(err => {
-//             return res.status(500).json({ error: err.message })
-//         })
-// })
+    Blog.find({ draft: false })
+        .populate("author", " personal_info.profile_img personal_info.username personal_info.fullname -_id ")
+        .sort({ publishedAt: -1 })
+        .select("blog_id title description banner activity tags publishedAt -_id")
+        .skip((page - 1) * max_limit)
+        .limit(max_limit)
+        .then(blogs => {
+            return res.status(200).json({ blogs })
+        })
+        .catch(err => {
+            return res.status(500).json({ error: err.message })
+        })
+})
 
 
 app.post("/all-latest-blogs-count", (req, res) => {
@@ -534,9 +534,6 @@ app.post('/create-blog', verifyJWT, (req, res) => {
         }
     }
 
-
-
-
     // make all the tags into lower case bcz to prevent the duplicati
     tags = tags.map(tag => tag.toLowerCase());
 
@@ -580,6 +577,20 @@ app.post('/create-blog', verifyJWT, (req, res) => {
 
 
 
+})
+
+//-----------------change the slug ---------------
+app.post("/change-slug", verifyJWT, (req, res)=>{
+    let user_id = req.user;
+    let { blog_id, new_blog_id } = req.body;
+
+    Blog.findOneAndUpdate({author : user_id, blog_id},{blog_id : new_blog_id})
+    .then(()=>{
+        return res.status(200).json({status : new_blog_id})
+    })
+    .catch(err =>{
+        return res.status(500).json({error : err.message});
+    })
 })
 
 //TODO: -------------------Like Routes-----------------------------------
@@ -898,24 +909,24 @@ app.post("/change-password", verifyJWT, (req, res) => {
 
 //TODO: -------------------Server Start and Listening-----------------------------------
 
-app.get("/new-notification", verifyJWT, (req, res) => {
+// app.get("/new-notification", verifyJWT, (req, res) => {
 
-    let user_id = req.user;
+//     let user_id = req.user;
 
-    Notification.exists({ notification_for: user_id, seen: false, user: { $ne: user_id } })
-        .then(result => {
-            if (result) {
-                return res.status(200).json({ new_notification_available: true })
-            }
-            else {
-                return res.status(200).json({ new_notification_available: false })
-            }
-        })
-        .catch(err => {
-            console.log(err);
-            return res.status(500).json({ error: err.message })
-        })
-})
+//     Notification.exists({ notification_for: user_id, seen: false, user: { $ne: user_id } })
+//         .then(result => {
+//             if (result) {
+//                 return res.status(200).json({ new_notification_available: true })
+//             }
+//             else {
+//                 return res.status(200).json({ new_notification_available: false })
+//             }
+//         })
+//         .catch(err => {
+//             console.log(err);
+//             return res.status(500).json({ error: err.message })
+//         })
+// })
 
 // app.use((req, res, next) => {
 //     return res.status(404).json({

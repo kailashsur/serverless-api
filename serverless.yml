@@ -18,15 +18,15 @@ functions:
     events:
       - httpApi: '*'
 
-  Medias:
-    handler: index.MediaHandler
-    events:
-      - httpApi:
-          path: /new-feature
-          method: GET
-  Blogs:
-    handler: index.latestBlog
-    events:
-      - httpApi:
-          path: /latest-blogs
-          method: POST
+  # Medias:
+  #   handler: index.MediaHandler
+  #   events:
+  #     - httpApi:
+  #         path: /new-feature
+  #         method: GET
+  # Blogs:
+  #   handler: index.latestBlog
+  #   events:
+  #     - httpApi:
+  #         path: /latest-blogs
+  #         method: POST
