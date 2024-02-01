@@ -512,7 +512,8 @@ app.post('/create-blog', verifyJWT, (req, res) => {
 
     let authorId = req.user;
 
-    let { title, description, banner, tags, content, draft, id } = req.body;
+    let { title, description, banner, tags, content, draft, id, slug } = req.body;
+   
 
     if (!title.length) {
         return res.status(403).json({ error: "You have to provide title to publish" })
@@ -539,16 +540,39 @@ app.post('/create-blog', verifyJWT, (req, res) => {
 
 
     // lets create the slug from title i just removed +nanoid()
-    let blog_id = id || title.replace(/[^a-zA-Z0-9]/g, ' ').replace(/\s+/g, "-").trim().toLowerCase();
+    let blog_id = id? id.trim().toLowerCase().toString() : id || title.replace(/[^a-zA-Z0-9]/g, ' ').replace(/\s+/g, "-").trim().toLowerCase();
 
     if (id) {
 
         Blog.findOneAndUpdate({ blog_id }, { title, description, banner, content, tags, draft: draft ? draft : false })
             .then(() => {
+                
                 return res.status(200).json({ id: blog_id });
             })
             .catch(err => {
                 return res.status(500).json({ error: err.message });
+            })
+
+    }else if(slug){
+        let blog = new Blog({
+            title, description, banner, content, tags, author: authorId, blog_id:slug, draft: Boolean(draft)
+        })
+
+        blog.save()
+            .then(blog => {
+
+                let incrementVal = draft ? 0 : 1;
+
+                User.findOneAndUpdate({ _id: authorId }, { $inc: { "account_info.total_posts": incrementVal }, $push: { "blogs": blog._id } })
+                    .then(user => {
+                        return res.status(200).json({ id: blog.blog_id })
+                    })
+                    .catch(err => {
+                        return res.status(500).json({ error: "Faild to update total post number" })
+                    })
+            })
+            .catch(err => {
+                return res.status(500).json({ error: err.message })
             })
 
     } else {
